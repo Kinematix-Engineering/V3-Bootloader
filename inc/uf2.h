@@ -46,7 +46,7 @@
 // Check various conditions; best leave on
 #define USE_ASSERT 0 // 188 bytes
 // Enable reading flash via FAT files; otherwise drive will appear empty
-#define USE_FAT 1 // 272 bytes
+#define USE_FAT 0 // 272 bytes
 // Enable index.htm file on the drive
 #define USE_INDEX_HTM 1 // 132 bytes
 // Enable USB CDC (Communication Device Class; i.e., USB serial) monitor for Arduino style flashing
@@ -58,7 +58,7 @@
 // Expose HID via WebUSB
 #define USE_WEBUSB 1
 // Doesn't yet disable code, just enumeration
-#define USE_MSC 1
+#define USE_MSC 0
 
 #ifdef BOARD_SCREEN
 #define USE_SCREEN 1
