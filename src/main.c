@@ -80,8 +80,22 @@
 
 #include "uf2.h"
 
+/*
+    Bytes           Purpose
+    0-2             Magic Bytes "KMX"
+    3               Version
+    4-13            Version String
+    14-15           -reserved-
+    16-39           Hardware Part Number
+    40              Hardware Version Major
+    41              Hardware Version Minor
+    42              Hardware Version Patch
+    
+    43-127          Not standardized in bootloader, refer to KFlash & ASW
+*/
+
 //  This prepopulates the table with the magic bytes and bootloader info
-__attribute__((section(".factorydata"))) const uint8_t factorydata[128] = {
+__attribute__((section(".factorydata"))) uint8_t factorydata[128] = {
     //  0-2: Magic Bytes
     FD_HDR_MAGIC_0,
     FD_HDR_MAGIC_1,
@@ -118,8 +132,51 @@ extern int8_t led_tick_step;
 #endif
 
 static void init_version(void) {
+    const char* moduleHardwarePartPtr           = (const char*)&factorydata[16];
+    const size_t moduleHardwarePartPtrLen       = 24;
+    bool moduleHardwarePartValid = false;
+    for (size_t i = 0; i < moduleHardwarePartPtrLen; i++) {
+        if (factorydata[16 + i] != 0xFF) {
+            moduleHardwarePartValid = true;
+            break;
+        }
+    }
+    
+    const uint8_t* moduleHardwareVersionMajor   = &factorydata[40];
+    const uint8_t* moduleHardwareVersionMinor   = &factorydata[41];
+    const uint8_t* moduleHardwareVersionPatch   = &factorydata[42];
+    bool moduleHardwareVersionValid = (*moduleHardwareVersionMajor != 0xFF && 
+                                       *moduleHardwareVersionMinor != 0xFF && 
+                                       *moduleHardwareVersionPatch != 0xFF);
+    
     strcpy(versionBuffer, BOOTLOADER_STRING);
-    strcat(versionBuffer, " (EXA-PART-NUM-HERE)");
+    
+    if(moduleHardwarePartValid && moduleHardwareVersionValid) {
+        strcat(versionBuffer, " (");
+        
+        char partStr[17];
+        size_t partLen = 0;
+        for (size_t i = 0; i < moduleHardwarePartPtrLen; i++) {
+            if (moduleHardwarePartPtr[i] != 0x00 && moduleHardwarePartPtr[i] != 0xFF) {
+                partStr[partLen++] = moduleHardwarePartPtr[i];
+            }
+        }
+        partStr[partLen] = '\0';
+        strcat(versionBuffer, partStr);
+        
+        char verStr[16];
+        verStr[0] = ' ';
+        verStr[1] = 'v';
+        verStr[2] = '0' + *moduleHardwareVersionMajor;
+        verStr[3] = '.';
+        verStr[4] = '0' + *moduleHardwareVersionMinor;
+        verStr[5] = '.';
+        verStr[6] = '0' + *moduleHardwareVersionPatch;
+        verStr[7] = '\0';
+        strcat(versionBuffer, verStr);
+        
+        strcat(versionBuffer, ")");
+    }
     strcat(versionBuffer, " [Arduino:XYZ]");
     strcat(versionBuffer, "\n\r");
 }
