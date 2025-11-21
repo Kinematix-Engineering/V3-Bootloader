@@ -31,7 +31,8 @@
 
 //  Nick Daria
 //  [Arduino:XYZ] has to be there or the flash will fail. idk why 
-static const char fullVersion[] = BOOTLOADER_STRING " [Arduino:XYZ] " __DATE__ " " __TIME__ "\n\r";
+char versionBuffer[VERSION_BUF_SIZE];
+//static const char fullVersion[] = BOOTLOADER_STRING " [Arduino:XYZ] " __DATE__ " " __TIME__ "\n\r";
 
 /* b_terminal_mode mode (ascii) or hex mode */
 #if USE_CDC_TERMINAL
@@ -212,7 +213,7 @@ void sam_ba_monitor_run(void) {
                         b_terminal_mode = 0;
 #endif
                     } else if (command == 'V') {
-                        cdc_write_buf(fullVersion, sizeof(fullVersion));
+                        cdc_write_buf(versionBuffer, sizeof(versionBuffer));
                     } else if (command == 'X') {
                         // Syntax: X[ADDR]#
                         // Erase the flash memory starting from ADDR to the end

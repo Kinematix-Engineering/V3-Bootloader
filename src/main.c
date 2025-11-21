@@ -117,6 +117,13 @@ extern int8_t led_tick_step;
     #define RESET_CONTROLLER RSTC
 #endif
 
+static void init_version(void) {
+    strcpy(versionBuffer, BOOTLOADER_STRING);
+    strcat(versionBuffer, " (EXA-PART-NUM-HERE)");
+    strcat(versionBuffer, " [Arduino:XYZ]");
+    strcat(versionBuffer, "\n\r");
+}
+
 /**
  * \brief Check the application startup condition
  *
@@ -334,6 +341,7 @@ int main(void) {
 
     logmsg("Before main loop");
 
+    init_version();
     usb_init();
 
     // not enumerated yet

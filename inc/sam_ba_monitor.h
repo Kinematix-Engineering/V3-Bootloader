@@ -42,6 +42,9 @@
 /* Selects USB as the communication interface of the monitor */
 #define SIZEBUFMAX 64
 
+#define VERSION_BUF_SIZE 128
+extern char versionBuffer[VERSION_BUF_SIZE];
+
 /**
  * \brief Initialize the monitor
  *
