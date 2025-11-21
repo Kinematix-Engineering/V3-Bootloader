@@ -30,6 +30,10 @@
 #ifndef _MAIN_H_
 #define _MAIN_H_
 
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
+#define ARR_SIZE(x) sizeof(x)/sizeof(x[0])
+
 //  Magic Bytes
 #define FD_HDR_MAGIC_0      'K'
 #define FD_HDR_MAGIC_1      'M'
@@ -37,9 +41,13 @@
 #define FD_HDR_VER          0x01
 
 //  Version info
-//      MUST BE 12 characters long
-//      Fill with '\0' for each unused character
-#define BOOTLOADER_STRING           "v3bl-1.0.0\0\0"
+//  * Numbers can ONLY BE ONE DIGIT!!!
+#define BOOTLOADER_VERSION_NAME     "v3bl-"
+#define BOOTLOADER_VERSION_MAJOR    1
+#define BOOTLOADER_VERSION_MINOR    0
+#define BOOTLOADER_VERSION_PATCH    0
+
+#define BOOTLOADER_STRING           BOOTLOADER_VERSION_NAME TOSTRING(BOOTLOADER_VERSION_MAJOR) "." TOSTRING(BOOTLOADER_VERSION_MINOR) "." TOSTRING(BOOTLOADER_VERSION_PATCH)
 
 #define CPU_FREQUENCY 48000000
 

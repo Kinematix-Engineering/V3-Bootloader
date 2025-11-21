@@ -101,8 +101,8 @@ __attribute__((section(".factorydata"))) const uint8_t factorydata[128] = {
     BOOTLOADER_STRING[7],
     BOOTLOADER_STRING[8],
     BOOTLOADER_STRING[9],
-    BOOTLOADER_STRING[10],
-    BOOTLOADER_STRING[11],
+    0x00,
+    0x00,
     [16 ... 127] = 0xFF
 };
 

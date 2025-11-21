@@ -29,8 +29,9 @@
 
 #include "uf2.h"
 
-
-static const char fullVersion[] = BOOTLOADER_STRING "\n\r";
+//  Nick Daria
+//  [Arduino:XYZ] has to be there or the flash will fail. idk why 
+static const char fullVersion[] = BOOTLOADER_STRING " [Arduino:XYZ] " __DATE__ " " __TIME__ "\n\r";
 
 /* b_terminal_mode mode (ascii) or hex mode */
 #if USE_CDC_TERMINAL
