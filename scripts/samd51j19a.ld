@@ -35,8 +35,10 @@ SEARCH_DIR(.)
 /* Memory Spaces Definitions */
 MEMORY
 {
-  rom      (rx)  : ORIGIN = 0x00000000, LENGTH = 16K
-  ram      (rwx) : ORIGIN = 0x20000000, LENGTH = 192K
+  rom               (rx)  : ORIGIN = 0x00000000, LENGTH = 16K - 256 - 16
+  factorydata       (rx)  : ORIGIN = 0x00003EF0, LENGTH = 256
+  binfo             (rx)  : ORIGIN = 0x00003FF0, LENGTH = 16
+  ram               (rwx) : ORIGIN = 0x20000000, LENGTH = 192K
 }
 
 /* The stack size used by the application. NOTE: you need to adjust according to your application. */
@@ -144,8 +146,14 @@ SECTIONS
     . = ALIGN(4);
     _end = . ;
 
-    _binfo_start = 16K - 4 * 4;
-    .binfo _binfo_start : {
-      KEEP(*(.binfo)) ;
-    } > rom
+    .binfo :
+    {
+        KEEP(*(.binfo))
+    } > binfo
+
+    .factorydata :
+    {
+        KEEP(*(.factorydata))
+        . = ORIGIN(factorydata) + LENGTH(factorydata);
+    } > factorydata
 }

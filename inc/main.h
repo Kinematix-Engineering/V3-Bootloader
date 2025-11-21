@@ -30,6 +30,17 @@
 #ifndef _MAIN_H_
 #define _MAIN_H_
 
+//  Magic Bytes
+#define FD_HDR_MAGIC_0      'K'
+#define FD_HDR_MAGIC_1      'M'
+#define FD_HDR_MAGIC_2      'X'
+#define FD_HDR_VER          0x01
+
+//  Version info
+//      MUST BE 12 characters long
+//      Fill with '\0' for each unused character
+#define BOOTLOADER_STRING           "v3bl-1.0.0\0\0"
+
 #define CPU_FREQUENCY 48000000
 
 #define FLASH_WAIT_STATES 1

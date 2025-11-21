@@ -80,6 +80,32 @@
 
 #include "uf2.h"
 
+//  This prepopulates the table with the magic bytes and bootloader info
+__attribute__((section(".factorydata"))) const uint8_t factorydata[128] = {
+    //  0-2: Magic Bytes
+    FD_HDR_MAGIC_0,
+    FD_HDR_MAGIC_1,
+    FD_HDR_MAGIC_2,
+
+    //  3: Version
+    FD_HDR_VER,
+
+    //  4-13: Bootloader version
+    BOOTLOADER_STRING[0],
+    BOOTLOADER_STRING[1],
+    BOOTLOADER_STRING[2],
+    BOOTLOADER_STRING[3],
+    BOOTLOADER_STRING[4],
+    BOOTLOADER_STRING[5],
+    BOOTLOADER_STRING[6],
+    BOOTLOADER_STRING[7],
+    BOOTLOADER_STRING[8],
+    BOOTLOADER_STRING[9],
+    BOOTLOADER_STRING[10],
+    BOOTLOADER_STRING[11],
+    [16 ... 127] = 0xFF
+};
+
 static void check_start_application(void);
 
 static volatile bool main_b_cdc_enable = false;
