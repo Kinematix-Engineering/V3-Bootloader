@@ -2,7 +2,7 @@
 #define BOARD_CONFIG_H
 
 #define VENDOR_NAME "Kinematix Engineering"
-#define PRODUCT_NAME "V3 Controller Bootloader"
+#define PRODUCT_NAME "Kinematix Engineering V3 Bootloader"
 #define VOLUME_LABEL "KMXV3"
 #define INDEX_URL "https://www.kinematixengineering.com/"
 #define BOARD_ID "SAMD51P20A-KMX-V3-v0"
