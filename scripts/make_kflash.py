@@ -45,7 +45,7 @@ def get_version_from_header(header_path):
     raise ValueError("Could not parse version from header")
 
 version = get_version_from_header(INCLUDE_DIR)
-output_file = os.path.join(os.path.dirname(OUTPUT_DIR.rstrip('/')), f"{version}.kflash")
+output_file = os.path.join(OUTPUT_DIR.rstrip('/'), f"{version}.kflash")
 bin_file = os.path.join(OUTPUT_DIR, "bootloader-kmx_v3-.bin")
 
 result = subprocess.run([
