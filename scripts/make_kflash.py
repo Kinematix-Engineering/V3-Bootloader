@@ -4,18 +4,25 @@ import re
 import sys
 import os
 
-# File
+# --- Configuration ---
 NAME = "V3 Bootloader"
 MODULE_PART = "KEL-CTRL-V3*"
 MODULE_TYPE = "0x10"
 PERMIT = "KDiag"
 
 # Cfg
-KFLASHCLI = r"KFlashCLI"
-OUTPUT_DIR = "../build/kmx_v3/"
-INCLUDE_DIR = "../inc/main.h"
+KFLASHCLI = r"kdc"
 DEVICE = "ATSAMD51P20A"
 TOOLCHAIN = "Atmel atprogram"
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+OUTPUT_DIR_REL = "build/kmx_v3/"
+INCLUDE_DIR_REL = "inc/main.h"
+
+OUTPUT_DIR = os.path.join(PROJECT_ROOT, OUTPUT_DIR_REL)
+INCLUDE_DIR = os.path.join(PROJECT_ROOT, INCLUDE_DIR_REL)
+# ----------------------------------------
 
 def get_version_from_header(header_path):
     with open(header_path, 'r') as f:
@@ -42,11 +49,13 @@ def get_version_from_header(header_path):
             if all(v is not None for v in [name, major, minor, patch]):
                 return f"{name}{major}.{minor}.{patch}"
     
-    raise ValueError("Could not parse version from header")
+    raise ValueError(f"Could not parse version from header: {header_path}")
 
 version = get_version_from_header(INCLUDE_DIR)
-output_file = os.path.join(OUTPUT_DIR.rstrip('/'), f"{version}.kflash")
-bin_file = os.path.join(OUTPUT_DIR, "bootloader-kmx_v3-.bin")
+os.makedirs(OUTPUT_DIR, exist_ok=True) 
+
+output_file = os.path.join(OUTPUT_DIR, f"{version}.kflash")
+bin_file = os.path.join(OUTPUT_DIR, "bootloader-kmx_v3.bin")
 
 result = subprocess.run([
     KFLASHCLI, "make",
@@ -58,7 +67,8 @@ result = subprocess.run([
     "--moduleType", MODULE_TYPE,
     "--toolchain", TOOLCHAIN,
     "--segment", f"bootloader|0x0|{bin_file}",
-    "--flag", f"device|{DEVICE}"
+    "--flag", f"device|{DEVICE}",
+    "--mapping", "v3bl_factorydata|0x3EF0"
 ])
 
 sys.exit(result.returncode)

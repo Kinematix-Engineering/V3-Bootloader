@@ -26,7 +26,7 @@ CFLAGS = $(COMMON_FLAGS) \
 -D__$(CHIP_VARIANT)__ \
 $(WFLAGS)
 
-UF2_VERSION_BASE = $(shell git describe --dirty --always --tags)
+UF2_VERSION_BASE = "1.0.0"
 
 ifeq ($(CHIP_FAMILY), samd21)
 LINKER_SCRIPT=scripts/samd21j18a.ld
@@ -91,7 +91,7 @@ SELF_SOURCES = $(COMMON_SRC) \
 OBJECTS = $(patsubst src/%.c,$(BUILD_PATH)/%.o,$(SOURCES))
 SELF_OBJECTS = $(patsubst src/%.c,$(BUILD_PATH)/%.o,$(SELF_SOURCES)) $(BUILD_PATH)/selfdata.o
 
-NAME=bootloader-$(BOARD)-$(UF2_VERSION_BASE)
+NAME=bootloader-$(BOARD)
 EXECUTABLE=$(BUILD_PATH)/$(NAME).bin
 SELF_EXECUTABLE=$(BUILD_PATH)/update-$(NAME).uf2
 SELF_EXECUTABLE_INO=$(BUILD_PATH)/update-$(NAME).ino
@@ -167,9 +167,6 @@ $(EXECUTABLE): $(OBJECTS)
 	-@arm-none-eabi-size $(BUILD_PATH)/$(NAME).elf | awk '{ s=$$1+$$2; print } END { print ""; print "Space left: " ($(BOOTLOADER_SIZE)-s) }'
 	@echo
 
-$(BUILD_PATH)/uf2_version.h: Makefile
-	echo "#define UF2_VERSION_BASE \"$(UF2_VERSION_BASE)\""> $@
-
 $(SELF_EXECUTABLE): $(SELF_OBJECTS)
 	$(CC) -L$(BUILD_PATH) $(LDFLAGS) \
 		 -T$(SELF_LINKER_SCRIPT) \
@@ -219,10 +216,10 @@ ifeq ($(CHIP_FAMILY),samd21)
 endif
 
 drop-pkg:
-	mv build/drop build/uf2-samdx1-$(UF2_VERSION_BASE)
-	cp bin-README.md build/uf2-samdx1-$(UF2_VERSION_BASE)/README.md
-	cd build; 7z a uf2-samdx1-$(UF2_VERSION_BASE).zip uf2-samdx1-$(UF2_VERSION_BASE)
-	rm -rf build/uf2-samdx1-$(UF2_VERSION_BASE)
+	mv build/drop build/uf2-samdx1
+	cp bin-README.md build/uf2-samdx1/README.md
+	cd build; 7z a uf2-samdx1.zip uf2-samdx1
+	rm -rf build/uf2-samdx1
 
 all-boards:
 	for f in `cd boards; ls` ; do "$(MAKE)" BOARD=$$f drop-board || break -1; done
