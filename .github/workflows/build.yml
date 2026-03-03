@@ -1,30 +1,37 @@
-name: Build
-
+name: Build CI
 on:
   push:
-    branches: [ "master" ]
   pull_request:
-    branches: [ "master" ]
-
+  release:
+    types: [published]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
 jobs:
   build:
-
-    runs-on: ubuntu-latest
-
+    runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v4
-
-    - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -y gcc-arm-none-eabi make
-
+    - name: Set up repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        filter: "blob:none"
+        show-progress: false
+        submodules: false
+    - name: Set up compiler
+      uses: carlosperate/arm-none-eabi-gcc-action@v1
+      with:
+        release: '13.2.Rel1'
+    - name: Extract version identifier
+      run: |
+        echo >> $GITHUB_ENV "UF2_VERSION_BASE=`git describe --dirty --always --tags`"
     - name: Build
-      run: make r
-
+      run: make submodules && make -j$(nproc) all BOARD=kmx_v3
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: firmware
+        name: kmx_v3-${{ env.UF2_VERSION_BASE }}
         path: |
-          **/*.bin
-          **/*.elf
-          **/*.hex
+          build/kmx_v3/*.bin
+          build/kmx_v3/*.elf
+          build/kmx_v3/*.uf2
