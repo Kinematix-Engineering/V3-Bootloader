@@ -158,6 +158,9 @@ dirs:
 	@echo "Building $(BOARD)"
 	-@mkdir -p $(BUILD_PATH)
 
+$(BUILD_PATH)/uf2_version.h:
+	@echo "#define UF2_VERSION_BASE \"$(UF2_VERSION_BASE)\"" > $@
+
 $(EXECUTABLE): $(OBJECTS)
 	$(CC) -L$(BUILD_PATH) $(LDFLAGS) \
 		 -T$(LINKER_SCRIPT) \
