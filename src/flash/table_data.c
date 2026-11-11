@@ -5,7 +5,9 @@ const V3BootTable v3_boot_table_image = {
     .magic = {'K', 'M', 'X'},
     .format_version = V3_BOOT_TABLE_VERSION,
     .boot_version = "v3bl-1.2.0",
-    .reserved = {[0 ... 63] = 0xff},
+    .module_type = 0x10,
+    .module_address = 0x10,
+    .reserved = {[0 ... 61] = 0xff},
     .padding = {[0 ... 411] = 0xff},
 };
 

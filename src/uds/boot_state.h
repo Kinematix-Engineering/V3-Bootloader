@@ -9,8 +9,6 @@
 enum {
     BOOT_ERASE_BLOCK_SIZE = 8192,
     BOOT_MAX_TRANSFER_DATA = 256,
-    BOOT_ERASE_ROUTINE = 0xff00,
-    BOOT_VALIDATE_ROUTINE = 0xff01,
 };
 
 typedef struct {

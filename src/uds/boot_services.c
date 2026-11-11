@@ -11,6 +11,7 @@ BootState boot_state;
 static UdsSession session;
 
 static const UdsServiceHandlerEntry services[] = {
+    {x10_DiagnosticSessionControl, &UDS_10_DSC},
     {x11_EcuReset, &UDS_11_ER},
     {x22_ReadDataByIdentifier, &UDS_22_RDBI},
     {x27_SecurityAccess, &UDS_27_SA},
@@ -44,7 +45,7 @@ size_t boot_uds_handle(const uint8_t *request, size_t request_len,
 
     // The library accepts extra bytes for some fixed-length services.
     if ((request[0] == 0x22 && request_len != 3) ||
-        (request[0] == 0x11 && request_len != 2)) {
+        ((request[0] == 0x10 || request[0] == 0x11) && request_len != 2)) {
         response[0] = 0x7f;
         response[1] = request[0];
         response[2] = UDS_NRC_IMLOIF;
@@ -55,6 +56,18 @@ size_t boot_uds_handle(const uint8_t *request, size_t request_len,
         .request = {(uint8_t *)request, request_len},
         .response = {response, response_capacity},
     };
+
+    /* The library encoder treats suppressed x10 positives as encoding errors.
+       Encode normally, then suppress only a successful programming response. */
+    if (request[0] == 0x10 && (request[1] & 0x80u)) {
+        uint8_t control[] = {0x10, (uint8_t)(request[1] & 0x7fu)};
+        UdsBufferCollection control_buffers = {
+            .request = {control, sizeof(control)},
+            .response = {response, response_capacity},
+        };
+        size_t length = uds_server_process_request(&session, control_buffers, NULL);
+        return length && response[0] == 0x50 ? 0 : length;
+    }
 
     return uds_server_process_request(&session, buffers, NULL);
 }

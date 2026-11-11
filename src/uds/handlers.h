@@ -2,10 +2,14 @@
 
 #include "services/uds_service_framework.h"
 
+/** Accepts programming session; rejects every other session level. */
+UDS_NRC_t x10_DiagnosticSessionControl(void *context, const void *request,
+                                      void *response, void *user);
+
 /** Handles authenticated ECU hard reset requests. */
 UDS_NRC_t x11_EcuReset(void *context, const void *request, void *response, void *user);
 
-/** Reports the diagnostic session, chip serial, and boot software version. */
+/** Reports identification, factory data, module identity, and uptime. */
 UDS_NRC_t x22_ReadDataByIdentifier(void *context, const void *request,
                                     void *response, void *user);
 

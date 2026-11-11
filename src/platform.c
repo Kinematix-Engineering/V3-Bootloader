@@ -2,6 +2,7 @@
 #include "v3_boot_table.h"
 
 static volatile uint32_t milliseconds;
+static volatile uint32_t milliseconds_high;
 static volatile uint32_t *const boot_magic = (volatile uint32_t *)BOOT_MAGIC_ADDRESS;
 static volatile uint8_t *const boot_request = (volatile uint8_t *)V3_BOOT_REQUEST_ADDRESS;
 static const uint32_t double_tap_magic = 0xf01669efu;
@@ -9,7 +10,9 @@ static const uint32_t quick_boot_magic = 0xf02669efu;
 static bool boot_session_response_pending;
 
 void SysTick_Handler(void) {
-    ++milliseconds;
+    if (++milliseconds == 0) {
+        ++milliseconds_high;
+    }
 }
 
 void platform_init(void) {
@@ -64,6 +67,15 @@ void platform_init(void) {
 
 uint32_t platform_millis(void) {
     return milliseconds;
+}
+
+uint64_t platform_uptime_ms(void) {
+    uint32_t high, low;
+    do {
+        high = milliseconds_high;
+        low = milliseconds;
+    } while (high != milliseconds_high);
+    return ((uint64_t)high << 32) | low;
 }
 
 void platform_delay(uint32_t ms) {

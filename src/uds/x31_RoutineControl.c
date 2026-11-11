@@ -1,4 +1,5 @@
 #include "handlers.h"
+#include "KMX_UDS.h"
 #include "boot_state.h"
 #include "../flash/nvm.h"
 #include "services/iso14229-1/31_routineControl.h"
@@ -18,7 +19,7 @@ UDS_NRC_t x31_RoutineControl(void *context, const void *request,
         return UDS_NRC_REQUEST_OUT_OF_RANGE;
     }
 
-    if (routine->routineIdentifier == BOOT_VALIDATE_ROUTINE) {
+    if (routine->routineIdentifier == KMX_ROUTINE_BOOT_VALIDATE) {
         if (routine->routineControlOptionBufLen != 12) {
             return UDS_NRC_IMLOIF;
         }
@@ -44,7 +45,7 @@ UDS_NRC_t x31_RoutineControl(void *context, const void *request,
         return UDS_NRC_PR;
     }
 
-    if (routine->routineIdentifier != BOOT_ERASE_ROUTINE) {
+    if (routine->routineIdentifier != KMX_ROUTINE_BOOT_ERASE) {
         return UDS_NRC_REQUEST_OUT_OF_RANGE;
     }
     if (routine->routineControlOptionBufLen != 4) {

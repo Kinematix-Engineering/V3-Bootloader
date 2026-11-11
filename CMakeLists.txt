@@ -13,7 +13,12 @@ if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/lib/kmxcpp_v3_bootloader/v3_boot_table
     message(FATAL_ERROR "Initialize kmxcpp_v3_bootloader with: git submodule update --init")
 endif()
 
+if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/lib/kmxcommon/KMX_UDS.h)
+    message(FATAL_ERROR "Initialize kmxcommon with: git submodule update --init")
+endif()
+
 set(UDSLIB_SOURCES
+    lib/udslib/services/iso14229-1/10_diagnosticSessionControl.c
     lib/udslib/lookup/uds_buf.c
     lib/udslib/session_server/uds_server.c
     lib/udslib/services/iso14229-1/11_ecuReset.c
@@ -39,6 +44,7 @@ add_executable(bootloader-kmx_v3.elf
     src/usb/transport.c
     src/crypto/aes128.c
     src/uds/boot_services.c
+    src/uds/x10_DiagnosticSessionControl.c
     src/uds/x11_EcuReset.c
     src/uds/x22_ReadDataByIdentifier.c
     src/uds/x27_SecurityAccess.c
@@ -54,6 +60,7 @@ target_include_directories(bootloader-kmx_v3.elf PRIVATE
     src/vendor/cmsis/CMSIS/Include
     src/vendor/samd51/include
     lib/udslib
+    lib/kmxcommon
     lib/kmxcpp_v3_bootloader)
 target_compile_definitions(bootloader-kmx_v3.elf PRIVATE __SAMD51P20A__)
 target_compile_options(bootloader-kmx_v3.elf PRIVATE

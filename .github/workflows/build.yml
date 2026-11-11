@@ -13,7 +13,7 @@ jobs:
           SUBMODULES_TOKEN: ${{ secrets.SUBMODULES_TOKEN }}
         run: |
           if [ -z "$SUBMODULES_TOKEN" ]; then
-            echo "::error::Set the SUBMODULES_TOKEN Actions secret to a token with Contents read access to V3-Bootloader and kmxcpp_v3_bootloader. See README.md."
+            echo "::error::Set the SUBMODULES_TOKEN Actions secret to a token with Contents read access to V3-Bootloader, kmxcpp_v3_bootloader, and kmxcommon."
             exit 1
           fi
       - uses: actions/checkout@v5

@@ -11,19 +11,25 @@ enum {
     EP_NOTIFY = 3,
     EP_COUNT = 4,
     PACKET_SIZE = 64,
+    MAX_TRANSFER_SIZE = 576, /* Accommodates a 516-byte COBS frame. */
 };
 
 typedef struct {
     uint8_t size;
     uint8_t offset;
     bool receiving;
-    uint8_t buffer[PACKET_SIZE];
+    __attribute__((aligned(4))) uint8_t buffer[PACKET_SIZE];
 } EndpointBuffer;
+
+_Static_assert(offsetof(EndpointBuffer, buffer) % 4 == 0,
+               "USB DMA buffers must be word aligned");
+_Static_assert(sizeof(EndpointBuffer) % 4 == 0,
+               "Every endpoint buffer must remain word aligned");
 
 static __attribute__((aligned(4))) UsbDeviceDescriptor endpoints[EP_COUNT];
 static __attribute__((aligned(4))) EndpointBuffer ep_buffer[EP_COUNT];
+static __attribute__((aligned(4))) uint8_t tx_buffer[EP_COUNT][MAX_TRANSFER_SIZE];
 static __attribute__((aligned(4))) uint8_t setup_buffer[PACKET_SIZE];
-static __attribute__((aligned(4))) uint8_t zero_packet;
 static uint8_t configuration;
 static bool data_terminal_open;
 static uint16_t control_length;
@@ -61,29 +67,28 @@ static void stall_control(void) {
 }
 
 static bool send_packet(const uint8_t *data, size_t length, unsigned ep) {
-    if (length > 0xffffu) {
+    if (length > MAX_TRANSFER_SIZE) {
         return false;
     }
 
-    if (!length) {
-        data = &zero_packet;
+    /* Never give DMA an unaligned caller buffer or a descriptor in flash. */
+    if (length) {
+        memcpy(tx_buffer[ep], data, length);
     }
 
-    if (length && length < PACKET_SIZE) {
-        memcpy(ep_buffer[ep].buffer, data, length);
-        data = ep_buffer[ep].buffer;
-    }
-
-    endpoints[ep].DeviceDescBank[1].ADDR.reg = (uint32_t)data;
+    endpoints[ep].DeviceDescBank[1].ADDR.reg = (uint32_t)tx_buffer[ep];
     endpoints[ep].DeviceDescBank[1].PCKSIZE.bit.BYTE_COUNT = (uint16_t)length;
     endpoints[ep].DeviceDescBank[1].PCKSIZE.bit.MULTI_PACKET_SIZE = 0;
-    endpoints[ep].DeviceDescBank[1].PCKSIZE.bit.AUTO_ZLP = length >= PACKET_SIZE;
+    endpoints[ep].DeviceDescBank[1].PCKSIZE.bit.AUTO_ZLP =
+        length != 0 && length % PACKET_SIZE == 0 &&
+        (ep != EP_CONTROL || length < control_length);
     USB->DEVICE.DeviceEndpoint[ep].EPINTFLAG.reg = USB_DEVICE_EPINTFLAG_TRCPT1;
     USB->DEVICE.DeviceEndpoint[ep].EPSTATUSSET.reg = USB_DEVICE_EPSTATUSSET_BK1RDY;
 
     uint32_t start = platform_millis();
     while (!(USB->DEVICE.DeviceEndpoint[ep].EPINTFLAG.reg & USB_DEVICE_EPINTFLAG_TRCPT1)) {
         if ((uint32_t)(platform_millis() - start) > 1000u) {
+            USB->DEVICE.DeviceEndpoint[ep].EPSTATUSCLR.reg = USB_DEVICE_EPSTATUSCLR_BK1RDY;
             return false;
         }
     }
@@ -302,6 +307,8 @@ void usb_device_init(void) {
     data_terminal_open = false;
 
     USB->HOST.CTRLA.bit.ENABLE = 1;
+    while (USB->DEVICE.SYNCBUSY.bit.ENABLE) {
+    }
 }
 
 bool usb_device_poll(void) {

@@ -4,3 +4,6 @@
 [submodule "lib/kmxcpp_v3_bootloader"]
 	path = lib/kmxcpp_v3_bootloader
 	url = https://github.com/Kinematix-Engineering/kmxcpp_v3_bootloader
+[submodule "lib/kmxcommon"]
+	path = lib/kmxcommon
+	url = https://github.com/Kinematix-Engineering/kmxcommon

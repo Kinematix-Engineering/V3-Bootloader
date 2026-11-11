@@ -11,6 +11,9 @@ void platform_init(void);
 /** Returns milliseconds since bootloader initialization. */
 uint32_t platform_millis(void);
 
+/** Returns the full 64-bit uptime in milliseconds, including tick wraparound. */
+uint64_t platform_uptime_ms(void);
+
 /** Waits for the requested number of milliseconds. */
 void platform_delay(uint32_t ms);
 
