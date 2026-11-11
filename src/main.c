@@ -15,7 +15,7 @@ int main(void) {
 
     for (;;) {
         usb_transport_poll();
-        if (boot_uds_take_reset()) {
+        if (usb_transport_take_reset()) {
             platform_reset_to_app();
         }
     }

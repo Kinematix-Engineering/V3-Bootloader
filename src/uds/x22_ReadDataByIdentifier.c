@@ -77,9 +77,8 @@ UDS_NRC_t x22_ReadDataByIdentifier(void *context, const void *request,
     }
 
     case KMX_PID_DIAGNOSTIC_METHOD: {
-        // Unsigned 16-bit diagnostic method, in network byte order.
-        static const uint8_t method[] = {0x00, 0x01};
-        return copy_value(result, method, sizeof(method));
+        static const char method[] = "v3-boot-v1";
+        return copy_value(result, method, sizeof(method) - 1);
     }
 
     case KMX_PID_UPTIME_MS: {
