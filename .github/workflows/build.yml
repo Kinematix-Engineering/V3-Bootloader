@@ -1,34 +1,37 @@
-name: Build CI
+name: Build bootloader
 on:
   push:
   pull_request:
-  release:
-    types: [published]
-concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-  cancel-in-progress: true
 jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
-    - name: Set up repository
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-        filter: "blob:none"
-        show-progress: false
-        submodules: false
-    - name: Set up compiler
-      uses: carlosperate/arm-none-eabi-gcc-action@v1
-      with:
-        release: '13.2.Rel1'
-    - name: Build
-      run: make submodules && make -j$(nproc) all BOARD=kmx_v3
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: kmx_v3
-        path: |
-          build/kmx_v3/*.bin
-          build/kmx_v3/*.elf
-          build/kmx_v3/*.uf2
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: carlosperate/arm-none-eabi-gcc-action@v1
+        with:
+          release: '13.2.Rel1'
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Configure
+        run: cmake -S . -B build -G Ninja -DCMAKE_TOOLCHAIN_FILE=cmake/arm-none-eabi.cmake
+      - name: Build
+        run: cmake --build build
+      - name: Test firmware protocol
+        run: sh tests/run_firmware.sh
+      - name: Test C# host protocol
+        run: dotnet run --project host/KMX.Flashing.Tests/KMX.Flashing.Tests.csproj --configuration Release
+      - name: Publish CLI
+        run: dotnet publish host/KMX.Flashing.Cli/KMX.Flashing.Cli.csproj --configuration Release --output dist/cli
+      - name: Upload binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: kmx_v3
+          path: build/*.bin
+      - name: Upload CLI
+        uses: actions/upload-artifact@v4
+        with:
+          name: kmx-uds-cli
+          path: dist/cli/

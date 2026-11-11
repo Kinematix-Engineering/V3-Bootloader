@@ -1,28 +1,6 @@
-/*!----------------- UF2-SAMD21 ThirdPartyNotices -------------------------------------------------------
-
-
-
-UF2-SAMD21 uses third party material from the projects listed below.
-
-The original copyright notice and the license under which Microsoft
-
-received such third party material are set forth below. Microsoft
-
-reserves all other rights not expressly granted, whether by
-
-implication, estoppel or otherwise.
-
-
-
-In the event that we accidentally failed to list a required notice, please
-
-bring it to our attention. Post an issue or email us:
-
-
-
-           yelmteam@microsoft.com
-
-
+V3 Bootloader retains CMSIS and SAMD51 device headers and startup/linker code
+from the original repository. Their upstream notices follow. The udslib
+submodule has its own MIT license in lib/udslib/LICENSE.
 
 ---------------------------------------------
 

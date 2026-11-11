@@ -1,3 +1,6 @@
-[submodule "lib/uf2"]
-	path = lib/uf2
-	url = https://github.com/Microsoft/uf2.git
+[submodule "lib/udslib"]
+	path = lib/udslib
+	url = https://github.com/nickdaria/udslib.git
+[submodule "lib/kmxcpp_v3_bootloader"]
+	path = lib/kmxcpp_v3_bootloader
+	url = https://github.com/Kinematix-Engineering/kmxcpp_v3_bootloader

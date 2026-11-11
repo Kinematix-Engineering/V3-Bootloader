@@ -1,0 +1,26 @@
+{
+  "configurations": [
+    {
+      "name": "SAMD51P20A",
+      "compilerPath": "/usr/bin/arm-none-eabi-gcc",
+      "compilerArgs": ["-mcpu=cortex-m4", "-mthumb"],
+      "cStandard": "c11",
+      "defines": ["__SAMD51P20A__"],
+      "includePath": [
+        "${workspaceFolder}/tests/include",
+        "${workspaceFolder}/src",
+        "${workspaceFolder}/src/flash",
+        "${workspaceFolder}/src/usb",
+        "${workspaceFolder}/src/uds",
+        "${workspaceFolder}/src/crypto",
+        "${workspaceFolder}/src/vendor/cmsis/CMSIS/Include",
+        "${workspaceFolder}/src/vendor/samd51/include",
+        "${workspaceFolder}/lib/udslib",
+        "${workspaceFolder}/lib/kmxcpp_v3_bootloader",
+        "${workspaceFolder}/build"
+      ],
+      "compileCommands": "${workspaceFolder}/build/compile_commands.json"
+    }
+  ],
+  "version": 4
+}
