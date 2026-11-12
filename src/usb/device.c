@@ -1,4 +1,5 @@
 #include "device.h"
+#include "protocol/protocol.h"
 #include "../platform.h"
 #include <v3_boot_table.h>
 
@@ -11,7 +12,7 @@ enum {
     EP_NOTIFY = 3,
     EP_COUNT = 4,
     PACKET_SIZE = 64,
-    MAX_TRANSFER_SIZE = 576, /* Accommodates a 516-byte COBS frame. */
+    MAX_TRANSFER_SIZE = KMX_PROTOCOL_MAX_FRAME,
 };
 
 typedef struct {

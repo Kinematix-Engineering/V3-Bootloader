@@ -40,7 +40,9 @@ add_executable(bootloader-kmx_v3.elf
     src/flash/range.c
     src/flash/nvm.c
     src/usb/device.c
-    src/usb/cobs.c
+    lib/kmxcpp_uart/cobs/cobs.c
+    lib/kmxcpp_uart/protocol/protocol.c
+    lib/kmxcpp_uart/protocol/checksum.c
     src/usb/transport.c
     src/crypto/aes128.c
     src/uds/boot_services.c
@@ -61,6 +63,8 @@ target_include_directories(bootloader-kmx_v3.elf PRIVATE
     src/vendor/samd51/include
     lib/udslib
     lib/kmxcommon
+    lib/kmxcpp_uart
+    lib/kmxcpp_uart/cobs
     lib/kmxcpp_v3_bootloader)
 target_compile_definitions(bootloader-kmx_v3.elf PRIVATE __SAMD51P20A__)
 target_compile_options(bootloader-kmx_v3.elf PRIVATE

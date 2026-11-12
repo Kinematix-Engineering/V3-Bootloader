@@ -7,3 +7,6 @@
 [submodule "lib/kmxcommon"]
 	path = lib/kmxcommon
 	url = https://github.com/Kinematix-Engineering/kmxcommon
+[submodule "lib/kmxcpp_uart"]
+	path = lib/kmxcpp_uart
+	url = https://github.com/Kinematix-Engineering/kmxcpp_uart
