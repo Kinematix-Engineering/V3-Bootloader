@@ -6,6 +6,9 @@
 /** Initializes the SAMD51 USB peripheral as a CDC device. */
 void usb_device_init(void);
 
+/** Detaches and stops USB DMA before transferring execution to ASW. */
+void usb_device_shutdown(void);
+
 /** Services USB control traffic and reports configuration state. */
 bool usb_device_poll(void);
 

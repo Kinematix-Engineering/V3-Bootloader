@@ -55,6 +55,7 @@ add_executable(bootloader-kmx_v3.elf
     src/uds/x36_TransferData.c
     src/uds/x37_RequestTransferExit.c
     lib/kmxcpp_v3_bootloader/v3_boot_table.c
+    lib/kmxcpp_v3_bootloader/v3_boot_sram.c
     ${UDSLIB_SOURCES}
 )
 

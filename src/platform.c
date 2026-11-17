@@ -1,13 +1,12 @@
 #include "platform.h"
-#include "v3_boot_table.h"
+#include "v3_boot_sram.h"
 
 static volatile uint32_t milliseconds;
 static volatile uint32_t milliseconds_high;
 static volatile uint32_t *const boot_magic = (volatile uint32_t *)BOOT_MAGIC_ADDRESS;
-static volatile uint8_t *const boot_request = (volatile uint8_t *)V3_BOOT_REQUEST_ADDRESS;
 static const uint32_t double_tap_magic = 0xf01669efu;
 static const uint32_t quick_boot_magic = 0xf02669efu;
-static bool boot_session_response_pending;
+static uint32_t choke_ms;
 
 void SysTick_Handler(void) {
     if (++milliseconds == 0) {
@@ -111,21 +110,15 @@ bool platform_app_valid(void) {
 }
 
 bool platform_should_enter_boot(void) {
-    boot_session_response_pending = RSTC->RCAUSE.reg == RSTC_RCAUSE_SYST &&
-                                    *boot_request == V3_BOOT_REQUEST_MARKER;
-    *boot_request = 0;
-
-    if (boot_session_response_pending) {
-        *boot_magic = 0;
-        return true;
-    }
-
+    choke_ms = V3_BOOT_SHARED_SRAM->boot_request == BOOT_CHOKE_REQUEST ?
+               BOOT_CHOKE_REQUESTED_MS : BOOT_CHOKE_DEFAULT_MS;
     if (!platform_app_valid()) {
         return true;
     }
 
     if (*boot_magic == quick_boot_magic) {
         *boot_magic = 0;
+        choke_ms = 0;
         return false;
     }
 
@@ -145,14 +138,17 @@ bool platform_should_enter_boot(void) {
     return false;
 }
 
-bool platform_boot_session_response_pending(void) {
-    return boot_session_response_pending;
+uint32_t platform_boot_choke_ms(void) {
+    return choke_ms;
 }
 
 void platform_jump_to_app(void) {
     const uint32_t *vectors = (const uint32_t *)APP_START;
 
     __disable_irq();
+    for (unsigned i = 0; i < BOOT_SHARED_SIZE; ++i) {
+        ((volatile uint8_t *)V3_BOOT_SHARED_SRAM)[i] = 0;
+    }
     SysTick->CTRL = 0;
     SCB->VTOR = APP_START;
     __set_MSP(vectors[0]);
@@ -163,6 +159,7 @@ void platform_jump_to_app(void) {
 }
 
 void platform_reset_to_app(void) {
+    V3_BOOT_SHARED_SRAM->boot_request = 0;
     *boot_magic = quick_boot_magic;
     NVIC_SystemReset();
 

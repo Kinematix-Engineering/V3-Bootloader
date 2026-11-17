@@ -38,7 +38,7 @@ MEMORY
   rom               (rx)  : ORIGIN = 0x00000000, LENGTH = 0x3A00
   boot_table        (rx)  : ORIGIN = 0x00003A00, LENGTH = 0x0200
   factory_table     (rx)  : ORIGIN = 0x00003C00, LENGTH = 0x0400
-  ram               (rwx) : ORIGIN = 0x20000000, LENGTH = 256K
+  ram               (rwx) : ORIGIN = 0x20000000, LENGTH = 256K - 16
 }
 
 /* The stack size used by the application. NOTE: you need to adjust according to your application. */

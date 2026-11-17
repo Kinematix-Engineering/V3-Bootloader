@@ -32,8 +32,8 @@ void platform_reset_to_app(void) __attribute__((noreturn));
 /** Resets the device into bootloader mode. */
 void platform_reset_to_boot(void) __attribute__((noreturn));
 
-/** Applies the ASW request, double-tap, and application-validity boot decision. */
+/** Applies double-tap and application-validity boot decisions and selects the choke window. */
 bool platform_should_enter_boot(void);
 
-/** Reports whether an ASW boot request requires a deferred 50 02 response. */
-bool platform_boot_session_response_pending(void);
+/** Startup listening window, unless boot mode was explicitly selected. */
+uint32_t platform_boot_choke_ms(void);

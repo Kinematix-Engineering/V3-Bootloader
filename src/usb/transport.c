@@ -11,13 +11,11 @@ enum {
 static uint8_t frame[MAX_COBS_FRAME];
 static size_t frame_len;
 static bool discard;
-static bool boot_session_response_pending;
 static bool reset_ready;
 
-void usb_transport_init(bool pending) {
+void usb_transport_init(void) {
     frame_len = 0;
     discard = false;
-    boot_session_response_pending = pending;
     reset_ready = false;
 }
 
@@ -49,14 +47,6 @@ void usb_transport_poll(void) {
     if (!usb_device_poll()) {
         usb_transport_reset();
         return;
-    }
-
-    if (boot_session_response_pending && usb_device_ready()) {
-        static const uint8_t session_response[] = {0x50, 0x02};
-        if (usb_transport_send(KMX_MESSAGE_UDS_DIAGNOSTIC,
-                               session_response, sizeof(session_response))) {
-            boot_session_response_pending = false;
-        }
     }
 
     uint8_t bytes[64];

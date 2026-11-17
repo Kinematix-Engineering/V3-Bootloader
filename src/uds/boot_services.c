@@ -34,7 +34,13 @@ void boot_uds_init(void) {
 }
 
 void boot_uds_disconnect(void) {
+    bool programming_requested = boot_state.programming_requested;
     boot_uds_init();
+    boot_state.programming_requested = programming_requested;
+}
+
+bool boot_uds_programming_requested(void) {
+    return boot_state.programming_requested;
 }
 
 size_t boot_uds_handle(const uint8_t *request, size_t request_len,

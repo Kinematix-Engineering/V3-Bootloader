@@ -1,9 +1,13 @@
 #pragma once
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
 /** Initializes the bootloader's UDS service table and connection state. */
 void boot_uds_init(void);
+
+/** Reports an accepted programming-session request; survives disconnects. */
+bool boot_uds_programming_requested(void);
 
 /** Clears authentication and any active download after USB disconnect. */
 void boot_uds_disconnect(void);

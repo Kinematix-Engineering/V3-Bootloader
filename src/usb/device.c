@@ -1,9 +1,17 @@
 #include "device.h"
+
 #include "protocol/protocol.h"
 #include "../platform.h"
 #include <v3_boot_table.h>
 
 #include <string.h>
+
+void usb_device_shutdown(void) {
+    USB->DEVICE.CTRLB.reg |= USB_DEVICE_CTRLB_DETACH;
+    USB->DEVICE.CTRLA.bit.ENABLE = 0;
+    while (USB->DEVICE.SYNCBUSY.bit.ENABLE) {
+    }
+}
 
 enum {
     EP_CONTROL = 0,

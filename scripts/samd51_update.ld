@@ -36,7 +36,7 @@ SEARCH_DIR(.)
 MEMORY
 {
   rom      (rx)  : ORIGIN = 0x00004000, LENGTH = 0x00080000 - 0x4000
-  ram      (rwx) : ORIGIN = 0x20000000, LENGTH = 0x00040000
+  ram      (rwx) : ORIGIN = 0x20000000, LENGTH = 0x0003FFF0
 }
 
 /* The stack size used by the application. NOTE: you need to adjust according to your application. */

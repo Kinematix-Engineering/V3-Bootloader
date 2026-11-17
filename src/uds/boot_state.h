@@ -12,6 +12,7 @@ enum {
 };
 
 typedef struct {
+    bool programming_requested;
     bool authenticated;
     bool seed_valid;
     uint8_t seed[17];

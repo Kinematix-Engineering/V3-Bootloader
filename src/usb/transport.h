@@ -3,8 +3,8 @@
 #include <stdbool.h>
 #include "protocol/protocol.h"
 
-/** Arms the one-shot session response for an ASW-requested boot. */
-void usb_transport_init(bool boot_session_response_pending);
+/** Initializes framing and clears the programming-request latch. */
+void usb_transport_init(void);
 
 /** Receives COBS frames, dispatches UDS, and sends framed responses. */
 void usb_transport_poll(void);
