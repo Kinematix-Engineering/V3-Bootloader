@@ -1,4 +1,5 @@
 #include "platform.h"
+#include "boot_config.h"
 #include "v3_boot_sram.h"
 
 static volatile uint32_t milliseconds;
@@ -7,6 +8,28 @@ static volatile uint32_t *const boot_magic = (volatile uint32_t *)BOOT_MAGIC_ADD
 static const uint32_t double_tap_magic = 0xf01669efu;
 static const uint32_t quick_boot_magic = 0xf02669efu;
 static uint32_t choke_ms;
+
+#if BOOT_ENABLE_READOUT_PROTECTION
+static void enforce_readout_protection(void) {
+    if (DSU->STATUSB.bit.PROT) {
+        return;
+    }
+
+    __disable_irq();
+    while (!NVMCTRL->STATUS.bit.READY) {
+    }
+    NVMCTRL->INTFLAG.reg = NVMCTRL_INTFLAG_DONE;
+    NVMCTRL->CTRLB.reg = NVMCTRL_CTRLB_CMDEX_KEY | NVMCTRL_CTRLB_CMD_SSB;
+    while (!NVMCTRL->INTFLAG.bit.DONE) {
+    }
+
+    // PROT reflects SSB only after NVM startup is replayed by a reset.
+    // Do not issue CELCK: debugger chip erase must remain available.
+    NVIC_SystemReset();
+    while (1) {
+    }
+}
+#endif
 
 void SysTick_Handler(void) {
     if (++milliseconds == 0) {
@@ -18,6 +41,10 @@ void platform_init(void) {
     WDT->CTRLA.reg = 0;
     while (WDT->SYNCBUSY.reg) {
     }
+
+#if BOOT_ENABLE_READOUT_PROTECTION
+    enforce_readout_protection();
+#endif
 
     NVMCTRL->CTRLA.bit.AUTOWS = 1;
 

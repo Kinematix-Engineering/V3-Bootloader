@@ -5,6 +5,15 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# Binutils must come from the selected compiler's toolchain, even when its
+# directory is not on PATH (for example a PlatformIO installation on Windows).
+get_filename_component(ARM_TOOLCHAIN_BIN "${CMAKE_C_COMPILER}" DIRECTORY)
+find_program(ARM_OBJCOPY NAMES arm-none-eabi-objcopy
+    HINTS "${ARM_TOOLCHAIN_BIN}" REQUIRED)
+find_program(ARM_SIZE NAMES arm-none-eabi-size
+    HINTS "${ARM_TOOLCHAIN_BIN}" REQUIRED)
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+
 if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/lib/udslib/udslib.h)
     message(FATAL_ERROR "Initialize udslib with: git submodule update --init")
 endif()
@@ -78,18 +87,20 @@ target_link_options(bootloader-kmx_v3.elf PRIVATE
     -T${CMAKE_CURRENT_SOURCE_DIR}/scripts/samd51.ld)
 
 add_custom_command(TARGET bootloader-kmx_v3.elf POST_BUILD
-    COMMAND ${CMAKE_OBJCOPY} -O binary --gap-fill 0xff --pad-to 0x4000
+    COMMAND "${ARM_OBJCOPY}" -O binary --gap-fill 0xff --pad-to 0x4000
             $<TARGET_FILE:bootloader-kmx_v3.elf>
             ${CMAKE_CURRENT_BINARY_DIR}/bootloader-kmx_v3.bin
-    COMMAND arm-none-eabi-size $<TARGET_FILE:bootloader-kmx_v3.elf>
-    BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/bootloader-kmx_v3.bin)
+    COMMAND "${ARM_SIZE}" $<TARGET_FILE:bootloader-kmx_v3.elf>
+    BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/bootloader-kmx_v3.bin
+    VERBATIM)
 
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/boot_image.c
-    COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/scripts/bin_to_c.py
+    COMMAND "${Python3_EXECUTABLE}" ${CMAKE_CURRENT_SOURCE_DIR}/scripts/bin_to_c.py
             ${CMAKE_CURRENT_BINARY_DIR}/bootloader-kmx_v3.bin
             ${CMAKE_CURRENT_BINARY_DIR}/boot_image.c
-    DEPENDS bootloader-kmx_v3.elf ${CMAKE_CURRENT_SOURCE_DIR}/scripts/bin_to_c.py)
+    DEPENDS bootloader-kmx_v3.elf ${CMAKE_CURRENT_SOURCE_DIR}/scripts/bin_to_c.py
+    VERBATIM)
 
 add_executable(bootupdate-kmx_v3.elf
     src/startup.c
@@ -111,10 +122,11 @@ target_link_options(bootupdate-kmx_v3.elf PRIVATE
     -Wl,--gc-sections -Wl,-Map=${CMAKE_CURRENT_BINARY_DIR}/bootupdate-kmx_v3.map
     -T${CMAKE_CURRENT_SOURCE_DIR}/scripts/samd51_update.ld)
 add_custom_command(TARGET bootupdate-kmx_v3.elf POST_BUILD
-    COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:bootupdate-kmx_v3.elf>
+    COMMAND "${ARM_OBJCOPY}" -O binary $<TARGET_FILE:bootupdate-kmx_v3.elf>
             ${CMAKE_CURRENT_BINARY_DIR}/bootupdate-kmx_v3.bin
-    COMMAND arm-none-eabi-size $<TARGET_FILE:bootupdate-kmx_v3.elf>
-    BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/bootupdate-kmx_v3.bin)
+    COMMAND "${ARM_SIZE}" $<TARGET_FILE:bootupdate-kmx_v3.elf>
+    BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/bootupdate-kmx_v3.bin
+    VERBATIM)
 
 # Explicit packaging target; requires kdiag and the KDiag master permit.
 # scripts/kflash.sh uses paths relative to the source tree's build directory.
