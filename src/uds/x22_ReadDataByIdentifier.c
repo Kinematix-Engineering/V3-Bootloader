@@ -1,6 +1,8 @@
 #include "handlers.h"
+#include "boot_state.h"
 #include "v3_boot_table.h"
 #include "KMX_UDS.h"
+#include "flash_sector_table.h"
 #include "../platform.h"
 #include "protocol/uds_data_identifiers.h"
 #include "services/iso14229-1/22_readDataByIdentifer.h"
@@ -8,6 +10,11 @@
 #include <string.h>
 
 enum { DIAGNOSTIC_SESSION = 0x02 };
+
+/* SAMD51P20A: 1 MiB of flash with uniform 8 KiB erase blocks. */
+static const flash_sector_table_entry_t flash_sector_table[] = {
+    {BOOT_START, FLASH_ERASE_BLOCK_SIZE, FLASH_SIZE / FLASH_ERASE_BLOCK_SIZE, 0},
+};
 
 static UDS_NRC_t copy_value(UDS_22_RDBI_Response *result,
                             const void *value, size_t length) {
@@ -32,6 +39,49 @@ UDS_NRC_t x22_ReadDataByIdentifier(void *context, const void *request,
     }
 
     switch (read->data_identifier) {
+    case KMX_PID_PROGRAMMING_TRANSFER_BLOCK_SIZE: {
+        /* Data bytes only; excludes the x36 service and sequence counter. */
+        const uint32_t size = BOOT_MAX_TRANSFER_DATA;
+        const uint8_t bytes[] = {
+            (uint8_t)(size >> 24), (uint8_t)(size >> 16),
+            (uint8_t)(size >> 8), (uint8_t)size,
+        };
+        return copy_value(result, bytes, sizeof(bytes));
+    }
+
+    case KMX_PID_PROGRAMMING_SECTOR_TABLE: {
+        const size_t count = sizeof(flash_sector_table) / sizeof(flash_sector_table[0]);
+        const size_t length = count * FLASH_SECTOR_TABLE_ENTRY_ENCODED_SIZE;
+        if (result->value_len < length) {
+            return UDS_NRC_RESPONSE_TOO_LONG;
+        }
+        for (size_t i = 0; i < count; ++i) {
+            if (!flash_sector_table_entry_encode(&flash_sector_table[i],
+                    result->value_buf + i * FLASH_SECTOR_TABLE_ENTRY_ENCODED_SIZE,
+                    FLASH_SECTOR_TABLE_ENTRY_ENCODED_SIZE)) {
+                return UDS_NRC_CONDITIONS_NOT_CORRECT;
+            }
+        }
+        result->value_len = length;
+        return UDS_NRC_PR;
+    }
+
+    case KMX_PID_PROGRAMMING_ASW_RANGE: {
+        const uint32_t fields[] = {APP_START, BANK_A_END - APP_START};
+        uint8_t bytes[8];
+        for (size_t i = 0; i < 2; ++i) {
+            for (size_t j = 0; j < 4; ++j) {
+                bytes[4 * i + j] = (uint8_t)(fields[i] >> (8 * (3 - j)));
+            }
+        }
+        return copy_value(result, bytes, sizeof(bytes));
+    }
+
+    case KMX_PID_PROGRAMMING_ERASE_BYTE: {
+        const uint8_t erased = FLASH_ERASE_BYTE;
+        return copy_value(result, &erased, sizeof(erased));
+    }
+
     case UDS_DID_SYSTEM_SUPPLIER_ECU_HARDWARE_NUMBER: {
         const V3FactoryTable *factory = v3_factory_table_get();
         size_t length = 0;
@@ -77,7 +127,7 @@ UDS_NRC_t x22_ReadDataByIdentifier(void *context, const void *request,
     }
 
     case KMX_PID_DIAGNOSTIC_METHOD: {
-        static const char method[] = "v3-boot-v1";
+        static const char method[] = "v3-boot-1";
         return copy_value(result, method, sizeof(method) - 1);
     }
 

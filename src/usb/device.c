@@ -37,7 +37,7 @@ static uint16_t control_length;
 
 static const uint8_t device_descriptor[] = {
     18, 1, 0x00, 0x02, 0xef, 0x02, 0x01, 64,
-    0x9a, 0x23, 0x31, 0x00, 0x02, 0x01, 1, 2, 3, 1,
+    0x9a, 0x23, 0x00, 0x0a, 0x02, 0x01, 1, 2, 3, 1,
 };
 
 static uint8_t configuration_descriptor[] = {
@@ -106,7 +106,7 @@ static void send_control(const uint8_t *data, size_t length) {
 }
 
 static void send_string(unsigned index) {
-    static const char *const names[] = {NULL, "KEL", "V3 Bootloader", NULL};
+    static const char *const names[] = {NULL, "KEL", "Kinematix Engineering V3", NULL};
     if (index == 0) {
         const uint8_t language[] = {4, 3, 0x09, 0x04};
         send_control(language, sizeof(language));

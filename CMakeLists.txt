@@ -115,5 +115,10 @@ add_custom_command(TARGET bootupdate-kmx_v3.elf POST_BUILD
     COMMAND arm-none-eabi-size $<TARGET_FILE:bootupdate-kmx_v3.elf>
     BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/bootupdate-kmx_v3.bin)
 
-# KFlash packaging is deferred until kdc is available in the build environment.
-# add_custom_target(kflash ...)
+# Explicit packaging target; requires kdiag and the KDiag master permit.
+# scripts/kflash.sh uses paths relative to the source tree's build directory.
+add_custom_target(kflash
+    COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/scripts/kflash.sh
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    DEPENDS bootloader-kmx_v3.elf bootupdate-kmx_v3.elf
+    VERBATIM)

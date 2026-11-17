@@ -5,7 +5,7 @@
 #include <string.h>
 
 enum {
-    ERASE_BLOCK_SIZE = 8192,
+    ERASE_BLOCK_SIZE = FLASH_ERASE_BLOCK_SIZE,
     WRITE_UNIT_SIZE = 16,
 };
 

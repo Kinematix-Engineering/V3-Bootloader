@@ -45,6 +45,13 @@ UDS_NRC_t x27_SecurityAccess(void *context, const void *request,
             return UDS_NRC_IMLOIF;
         }
 
+        if (boot_state.authenticated) {
+            static const uint8_t unlocked_seed[sizeof(boot_state.seed)] = {0};
+            result->securitySeed = unlocked_seed;
+            result->securitySeedLen = sizeof(unlocked_seed);
+            return UDS_NRC_PR;
+        }
+
         uint32_t now = platform_millis();
         if (boot_state.failures >= 5 &&
             (int32_t)(now - boot_state.locked_until) < 0) {

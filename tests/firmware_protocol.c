@@ -21,6 +21,15 @@ const V3BootTable *v3_boot_table_get(void) {
     return &test_table;
 }
 
+const V3FactoryTable *v3_factory_table_get(void) {
+    static const V3FactoryTable factory = {0};
+    return &factory;
+}
+
+uint64_t platform_uptime_ms(void) {
+    return 0;
+}
+
 static uint8_t serial[16];
 static int erases;
 static int writes;
@@ -113,8 +122,8 @@ int main(void) {
     const uint8_t session_response[] = {0x62, 0xf1, 0x86, 0x02};
     expect(session_request, sizeof(session_request), session_response, sizeof(session_response));
     const uint8_t serial_request[] = {0x22, 0xf1, 0x8c};
-    uint8_t serial_response[19] = {0x62, 0xf1, 0x8c};
-    memcpy(serial_response + 3, serial, 16);
+    uint8_t serial_response[35] = {0x62, 0xf1, 0x8c};
+    memcpy(serial_response + 3, "000102030405060708090A0B0C0D0E0F", 32);
     expect(serial_request, sizeof(serial_request), serial_response, sizeof(serial_response));
     const uint8_t read_request[] = {0x35};
     const uint8_t read_rejected[] = {0x7f, 0x35, 0x11};
@@ -146,6 +155,9 @@ int main(void) {
 
     const uint8_t unlocked[] = {0x67, 0x02};
     expect(answer, sizeof(answer), unlocked, sizeof(unlocked));
+
+    const uint8_t unlocked_seed[19] = {0x67, 0x01};
+    expect(seed_request, sizeof(seed_request), unlocked_seed, sizeof(unlocked_seed));
 
     const uint8_t bank_b_erase[] = {0x31, 0x01, 0xff, 0x00, 0x00, 0x08, 0x00, 0x00};
     const uint8_t out_of_range[] = {0x7f, 0x31, 0x31};
@@ -193,8 +205,9 @@ int main(void) {
     assert(erases == 1);
 
     const uint8_t download[] = {0x34, 0, 0x44, 0, 0, 0x40, 0, 0, 0, 0, 0x10};
-    const uint8_t download_ok[] = {0x74, 0x20, 0x01, 0x02};
+    const uint8_t download_ok[] = {0x74, 0x20, 0x08, 0x02};
     expect(download, sizeof(download), download_ok, sizeof(download_ok));
+    expect(seed_request, sizeof(seed_request), unlocked_seed, sizeof(unlocked_seed));
     const uint8_t transfer_active[] = {0x7f, 0x31, 0x24};
     expect(validate_request, sizeof(validate_request),
            transfer_active, sizeof(transfer_active));
@@ -226,5 +239,9 @@ int main(void) {
 
     boot_uds_disconnect();
     expect(erase_request, sizeof(erase_request), denied, sizeof(denied));
+    length = boot_uds_handle(seed_request, sizeof(seed_request),
+                             seed_response, sizeof(seed_response));
+    assert(length == 19 && seed_response[0] == 0x67 &&
+           seed_response[1] == 1 && seed_response[2] == 1);
     puts("firmware UDS protocol passed");
 }

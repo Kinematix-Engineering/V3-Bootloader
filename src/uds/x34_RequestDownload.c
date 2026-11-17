@@ -3,7 +3,11 @@
 #include "../flash/nvm.h"
 #include "services/iso14229-1/34_requestDownload.h"
 
-static const uint8_t max_block_length[2] = {0x01, 0x02};
+/* UDS maxNumberOfBlockLength includes the service and sequence bytes. */
+static const uint8_t max_block_length[2] = {
+    (uint8_t)((BOOT_MAX_TRANSFER_DATA + 2u) >> 8),
+    (uint8_t)(BOOT_MAX_TRANSFER_DATA + 2u),
+};
 
 static bool range_erased(uint32_t address, uint32_t length) {
     uint32_t first = address / BOOT_ERASE_BLOCK_SIZE;
