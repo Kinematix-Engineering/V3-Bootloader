@@ -3,9 +3,7 @@ OFFSET ?= 0x4000
 
 .PHONY: all kflash flash clean
 all:
-ifeq ($(wildcard build/CMakeCache.txt),)
 	cmake -S . -B build -G Ninja -DCMAKE_TOOLCHAIN_FILE=cmake/arm-none-eabi.cmake
-endif
 	cmake --build build
 
 kflash: all

@@ -4,7 +4,7 @@
 // Clearing this option does not unlock a secured chip: debugger chip erase is
 // required and erases the installed bootloader and application.
 #ifndef BOOT_ENABLE_READOUT_PROTECTION
-#define BOOT_ENABLE_READOUT_PROTECTION 0
+#define BOOT_ENABLE_READOUT_PROTECTION 1
 #endif
 
 #if BOOT_ENABLE_READOUT_PROTECTION != 0 && BOOT_ENABLE_READOUT_PROTECTION != 1
